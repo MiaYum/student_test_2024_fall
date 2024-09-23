@@ -1,0 +1,99 @@
+---
+title: "College Study"
+author: "Mia Yu"
+output:
+  pdf_document:
+    latex_engine: xelatex
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{lipsum}
+- \pagestyle{fancy}
+- \fancyhead[R]{\thepage}
+- \fancypagestyle{plain}{\pagestyle{fancy}}
+editor_options: 
+  chunk_output_type: console
+--- 
+
+```{r, set up, include=FALSE, message=FALSE, warning=FALSE}
+library(ISLR)
+library(ggplot2)
+library(caret)
+library(earth)
+library(pdp)
+library(gridExtra)
+library(tidymodels)
+library(mgcv)
+```
+
+# Data Overview
+
+We explore the application of nonlinear models to analyze the **"College"
+dataset**, comprising statistics from 565 US colleges as reported in a past issue of US News and World Report. The predictors are
+
+| predictors  | Explanation  |
+|:---:|:---:|:---:|
+| Apps | umber of applications received |
+| Accept | Number of applications accepted |
+| Enroll | Number of new students enrolled |
+| Top10perc | Pct. new students from top 10% of H.S. class |
+| Top25perc | Pct. new students from top 25% of H.S. class |
+| F.Undergrad | Number of fulltime undergraduates |
+| P.Undergrad | Number of parttime undergraduates |
+| Room.Board | Room and board costs |
+| Books | Estimated book costs |
+| Personal | Estimated personal spending |
+| PhD | Pct. of faculty with Ph.D.’s |
+| Terminal | Pct. of faculty with terminal degree |
+| S.F.Ratio | Student/faculty ratio |
+| perc.alumni | Pct. alumni who donate |
+| Expend | Instructional expenditure per student |
+| Grad.Rate | Graduation rate |
+
+For more information, you can go to [U.S.News](https://www.usnews.com).
+
+```{r, message=FALSE}
+data(College)
+skimr::skim(College)
+```
+
+Partition the dataset into two parts: *training data (80%) and test data (20%).*
+
+```{r}
+set.seed(123)
+total_rows <- nrow(College) 
+train_indices <- sample(1:total_rows, size = 0.8 * total_rows) 
+train_data <- College[train_indices, ]
+test_data <- College[-train_indices, ]
+```
+
+# Model Fitting
+
+Fit smoothing spline models to predict out-of-state tuition (Outstate) using the percentage of alumni who donate (perc.alumni) as the only predictor, across a range of degrees of freedom. 
+
+```{r}
+df_results <- data.frame()
+
+for(df in seq(2, 10, by=1)){ 
+  fit.ss <- smooth.spline(train_data$perc.alumni, train_data$Outstate, df=df)
+  
+  pred.ss <- predict(fit.ss, x = test_data$perc.alumni)
+  
+  pred.ss.df <- data.frame(real = test_data$Outstate, pred = pred.ss$y, df = df)
+  df_results <- rbind(df_results, pred.ss.df)
+}
+```
+
+Plot the model fits for each degree of freedom. 
+
+```{r}
+ggplot(df_results, aes(x = real, y = pred, colour = factor(df))) +
+  geom_point() +
+  geom_line(aes(group = df)) +
+  theme_bw() +
+  labs(title = "Smoothing Spline Fits for Different Degrees of Freedom",
+       x = "Actual Outstate Tuition",
+       y = "Predicted Outstate Tuition",
+       colour = "Degrees of Freedom")
+```
+
+The obtained result of 2.000214 suggests that the optimal degree of freedom is approximately 2, indicating that the model is relatively linear. As the degree of freedom increases, the model transitions from linear to more curved, but too high a degree of freedom may lead to overfitting, meaning the model complexity is too high, reflecting the random noise in the data rather than the true trend. This degree of freedom is recommended by generalized cross-validation (GCV) and is automatically chosen by the smooth.spline() function, to demonstrate the relationship between the percentage of alumni who donate and the out-of-state tuition.
