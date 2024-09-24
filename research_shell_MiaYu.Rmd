@@ -25,7 +25,9 @@ library(tidymodels)
 library(mgcv)
 ```
 
-# Data Overview
+# 1 Research Project
+
+## Data Overview
 
 We explore the application of nonlinear models to analyze the **"College"
 dataset**, comprising statistics from 565 US colleges as reported in a past issue of US News and World Report. The predictors are
@@ -66,7 +68,7 @@ train_data <- College[train_indices, ]
 test_data <- College[-train_indices, ]
 ```
 
-# Model Fitting
+## Model Fitting
 
 Fit smoothing spline models to predict out-of-state tuition (Outstate) using the percentage of alumni who donate (perc.alumni) as the only predictor, across a range of degrees of freedom. 
 
@@ -97,3 +99,28 @@ ggplot(df_results, aes(x = real, y = pred, colour = factor(df))) +
 ```
 
 The obtained result of 2.000214 suggests that the optimal degree of freedom is approximately 2, indicating that the model is relatively linear. As the degree of freedom increases, the model transitions from linear to more curved, but too high a degree of freedom may lead to overfitting, meaning the model complexity is too high, reflecting the random noise in the data rather than the true trend. This degree of freedom is recommended by generalized cross-validation (GCV) and is automatically chosen by the smooth.spline() function, to demonstrate the relationship between the percentage of alumni who donate and the out-of-state tuition.
+
+\newpage
+
+# 2 Answering Questions
+
+* How would you list all files in the current directory, including hidden ones?
+  * use `list.files(all.files = TRUE)`
+* What command would you use to find the number of lines in a file named data.txt?
+  * Using the `wc -l data.txt` command in a terminal
+  * Using `system("wc -l data.txt")` in R
+* How can you search for the string "error" in all *.log files in the current directory?
+  * Using `grep "error" *.log` in a terminal
+* Describe how you would change the permissions of a file named script.sh to make it executable.
+  * use the command in the terminal
+    1. `chmod +x script.sh`
+    2. `ls -l script.sh`
+    3. `./script.sh`
+* How would you display the last 20 lines of a file named output.log?
+  * Using `tail -n 20 output.log` in terminal
+* Explain how to combine the contents of file1.txt and file2.txt into a new file named combined.txt.
+  * Using `cat file1.txt file2.txt > combined.txt` in the terminal.
+* How would you check for the presence of the word "Completed" in a file named status.txt and display the line containing it?
+  * Using `grep "Completed" status.txt` in the terminal.
+* What command can you use to sort the lines in a file named unsorted.txt in alphabetical order and save the result to a new file named sorted.txt?
+  * Using `sort unsorted.txt > sorted.txt` in the terminal.
